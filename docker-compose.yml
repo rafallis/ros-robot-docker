@@ -1,0 +1,12 @@
+version: '3'
+services: 
+  slave:
+    build -f "files/Dockerfile-ros-melodic"
+  volumes:
+    - cam_pub/:/
+  container_name: publisher
+  environment: 
+    - "ROS_HOSTNAME=publisher"
+    - "ROS_MASTER_URI=http://192.168.1.3:11311"
+  command: 
+    rosrun 
