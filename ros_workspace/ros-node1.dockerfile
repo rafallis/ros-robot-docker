@@ -3,9 +3,9 @@ FROM ros:melodic
 LABEL Maintainer="Rafael Jardim rafaelfgjardim@gmail.com"
 
 RUN apt-get update \
-    && apt-get install -q -y build-essential
+    && apt-get install -q -y build-essential ros-melodic-rosbridge-server
 
-RUN rm /bin/sh \
+RUN mv /bin/sh /bin/sh-old \
     && ln -s /bin/bash bin/sh
 
 ENV CATKIN_WS=/root/catkin_ws
@@ -15,11 +15,12 @@ RUN source /opt/ros/melodic/setup.bash \
     && cd ${CATKIN_WS}/src \
     && catkin_init_workspace
 
-ADD cam_pub ${CATKIN_WS}/src/
+ADD publisher/cam_pub ${CATKIN_WS}/src/
 
 RUN cd ${CATKIN_WS} \
     && catkin_make \
     && source ${CATKIN_WS}/devel/setup.bash
 
-ENTRYPOINT source /opt/ros/melodic/setup.bash \
-            && catkin_make
+EXPOSE 9090 11311 33690
+
+ENTRYPOINT source /opt/ros/melodic/setup.bash; rosrun cam_pub cam_pub_node /dev/video0

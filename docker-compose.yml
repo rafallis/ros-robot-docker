@@ -1,12 +1,51 @@
+# docker-compose up
+
 version: '3'
-services: 
-  slave:
-    build -f "files/Dockerfile-ros-melodic"
-  volumes:
-    - cam_pub/:/
-  container_name: publisher
-  environment: 
-    - "ROS_HOSTNAME=publisher"
-    - "ROS_MASTER_URI=http://192.168.1.3:11311"
-  command: 
-    rosrun 
+services:
+  ros-master:
+    build:
+      context: ./ros_workspace
+      dockerfile: ros-master.dockerfile
+    environment: 
+      - "ROS_MASTER_URI=http://10.5.0.5:11311/"
+      - "ROS_IP=10.5.0.5"
+      - "ROS_HOSTNAME=10.5.0.5"
+      - "DISPLAY=$DISPLAY"
+      - "QT_X11_NO_MITSHM=1"
+    volumes:
+      - ../data/logs/ros_master:/root/.ros/
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    networks: 
+      staticip:
+        ipv4_address: 10.5.0.5
+    container_name: ros_master
+    
+  ros-node0:    
+    build:
+      context: ./ros_workspace
+      dockerfile: ros-node0.dockerfile
+    environment: 
+      - "ROS_MASTER_URI=http://10.5.0.5:11311"
+      - "ROS_IP=10.5.0.6"
+      - "ROS_HOSTNAME=10.5.0.6"
+      - "DISPLAY=$DISPLAY"
+      - "QT_X11_NO_MITSHM=1"
+    volumes:
+      - ../data/logs/ros-node1:/root/.ros/
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    networks: 
+      staticip:
+        ipv4_address: 10.5.0.6
+    container_name: ros_node0
+    
+    devices: 
+      - /dev/video1:/dev/video0
+    command: 
+      rosrun 
+
+networks:
+  staticip:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16

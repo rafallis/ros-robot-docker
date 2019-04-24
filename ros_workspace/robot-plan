@@ -1,0 +1,5 @@
+<launch>
+    <node name="robot_plan" pkg="robot_plan" type="plan_server.py" output="screen" respawn="true"
+        <rosparam command="load" file="$(find robot_plan)/config/config.yml" />
+    </node>
+</launch>
